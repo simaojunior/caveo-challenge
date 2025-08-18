@@ -1,8 +1,8 @@
+import type { UserRole } from '@/domain/entities/user';
+
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 export type HttpHeaders = Record<string, string | string[] | undefined>;
-
-export type UserRole = 'admin' | 'user';
 
 export type AuthenticatedUser = {
   id: string;
