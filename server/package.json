@@ -4,7 +4,7 @@
   "description": "A challenge project for Caveo",
   "main": "index.js",
   "scripts": {
-		"create:env": "node -r fs -e \"fs.copyFileSync('.env.example', '.env', fs.constants.COPYFILE_EXCL)\"",
+    "create:env": "node -r fs -e \"fs.copyFileSync('.env.example', '.env', fs.constants.COPYFILE_EXCL)\"",
     "dev": "tsx watch --env-file=.env src/server.ts",
     "build": "tsc && tsc-alias",
     "start": "node --env-file=.env build/src/server.js",
@@ -25,10 +25,13 @@
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@types/koa": "^3.0.0",
+    "@types/koa__router": "^12.0.4",
     "@types/node": "^24.3.0",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.1",
     "globals": "^16.3.0",
+    "pino-pretty": "^13.1.1",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.4",
@@ -36,6 +39,10 @@
     "typescript-eslint": "^8.39.0"
   },
   "dependencies": {
+    "@koa/router": "^14.0.0",
+    "koa": "^3.0.1",
+    "koa-body": "^6.0.1",
+    "pino": "^9.9.0",
     "zod": "^4.0.17"
   }
 }
