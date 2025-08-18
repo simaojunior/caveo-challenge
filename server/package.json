@@ -4,12 +4,14 @@
   "description": "A challenge project for Caveo",
   "main": "index.js",
   "scripts": {
+		"create:env": "node -r fs -e \"fs.copyFileSync('.env.example', '.env', fs.constants.COPYFILE_EXCL)\"",
     "dev": "tsx watch --env-file=.env src/server.ts",
     "build": "tsc && tsc-alias",
-    "start": "node --env-file=.env build/server.js",
+    "start": "node --env-file=.env build/src/server.js",
     "type-check": "tsc --noEmit",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "eslint src/**/*.ts --fix"
   },
   "author": {
     "name": "Simão Júnior",
