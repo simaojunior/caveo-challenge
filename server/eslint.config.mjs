@@ -25,7 +25,7 @@ export default [
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
     languageOptions: {
-      globals: globals.node
+      globals: globals.node,
     },
     rules: {
       // Code Quality Rules
