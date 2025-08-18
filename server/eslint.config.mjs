@@ -50,7 +50,25 @@ export default [
       ],
 
       // Spacing & Indentation
-      indent: ['error', 2, { SwitchCase: 1 }],
+      indent: [
+        'error',
+        2,
+        {
+          SwitchCase: 1,
+          MemberExpression: 1,
+          FunctionDeclaration: { parameters: 1, body: 1 },
+          FunctionExpression: { parameters: 1, body: 1 },
+          CallExpression: { arguments: 1 },
+          ArrayExpression: 1,
+          ObjectExpression: 1,
+          ignoredNodes: [
+            'PropertyDefinition',
+            'MethodDefinition',
+            'TSPropertySignature',
+            'TSMethodSignature',
+          ],
+        },
+      ],
       'no-mixed-spaces-and-tabs': 'error',
       'no-trailing-spaces': 'error',
 
@@ -107,7 +125,7 @@ export default [
     rules: {
       // TypeScript-specific rules
       '@typescript-eslint/no-namespace': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
 
       // Naming conventions
       '@typescript-eslint/naming-convention': [
