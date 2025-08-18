@@ -1,38 +1,115 @@
 import js from '@eslint/js';
-import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default defineConfig([
+export default [
+  // Global ignores
+  {
+    ignores: [
+      '.husky/**',
+      '.vscode/**',
+      'coverage/**',
+      'dist/**',
+      'build/**',
+      'documentation/**',
+      'node_modules/**',
+      'public/**',
+    ],
+  },
+
+  // Base JavaScript/TypeScript rules
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+
+  // Custom formatting and linting rules
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
-    plugins: { js },
-    extends: ['js/recommended'],
-    languageOptions: { globals: globals.node },
+    languageOptions: {
+      globals: globals.node
+    },
     rules: {
-      quotes: ['error', 'single'],
-      semi: ['error', 'always'],
-      'comma-dangle': ['error', 'always-multiline'],
-      'object-curly-spacing': ['error', 'always'],
-      'array-bracket-spacing': ['error', 'never'],
+      // Code Quality Rules
+      'no-console': 'warn',
       'no-empty': 'off',
-      // 'space-before-function-paren': ['error', 'never'],
-      'arrow-spacing': ['error', { before: true, after: true }],
-      'key-spacing': ['error', { beforeColon: false, afterColon: true }],
-      'no-multiple-empty-lines': ['error', { max: 1 }],
-      'eol-last': ['error', 'always'],
       eqeqeq: ['error', 'always'],
       curly: ['error', 'all'],
       'no-duplicate-imports': 'error',
-      'no-console': 'warn',
+
+      // Formatting Rules - Line Length & Wrapping
+      'max-len': [
+        'error',
+        {
+          code: 80,
+          tabWidth: 2,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+          ignoreComments: true,
+        },
+      ],
+
+      // Spacing & Indentation
+      indent: ['error', 2, { SwitchCase: 1 }],
+      'no-mixed-spaces-and-tabs': 'error',
+      'no-trailing-spaces': 'error',
+
+      // Quotes & Semicolons
+      quotes: ['error', 'single', { avoidEscape: true }],
+      semi: ['error', 'always'],
+
+      // Comma Rules
+      'comma-dangle': ['error', 'always-multiline'],
+      'comma-spacing': ['error', { before: false, after: true }],
+      'comma-style': ['error', 'last'],
+
+      // Object & Array Spacing
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
+      'computed-property-spacing': ['error', 'never'],
+
+      // Function & Arrow Function Spacing
+      'arrow-spacing': ['error', { before: true, after: true }],
+      'space-before-function-paren': [
+        'error',
+        {
+          anonymous: 'always',
+          named: 'never',
+          asyncArrow: 'always',
+        },
+      ],
+      'space-in-parens': ['error', 'never'],
+
+      // Key-Value Spacing
+      'key-spacing': ['error', { beforeColon: false, afterColon: true }],
+
+      // Line Management
+      'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
+      'eol-last': ['error', 'always'],
+      'newline-before-return': 'error',
+
+      // Object formatting
+      'object-curly-newline': [
+        'error',
+        {
+          ObjectExpression: { multiline: true, consistent: true },
+          ObjectPattern: { multiline: true, consistent: true },
+          ImportDeclaration: { multiline: true, consistent: true },
+          ExportDeclaration: { multiline: true, consistent: true },
+        },
+      ],
     },
   },
-  ...tseslint.configs.recommended,
+
+  // TypeScript specific rules
   {
     files: ['**/*.{ts,mts,cts}'],
     rules: {
+      // TypeScript-specific rules
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+
+      // Naming conventions
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -43,7 +120,17 @@ export default defineConfig([
             match: true,
           },
         },
+        {
+          selector: 'typeAlias',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'enum',
+          format: ['PascalCase'],
+        },
       ],
+
+      // Import/Export formatting
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -54,22 +141,4 @@ export default defineConfig([
       ],
     },
   },
-  {
-    files: ['**/*.{ts,mts,cts}'],
-    languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    rules: {
-      '@typescript-eslint/consistent-type-exports': [
-        'error',
-        {
-          fixMixedExportsWithInlineTypeSpecifier: true,
-        },
-      ],
-    },
-  },
-]);
+];
