@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "target": "ESNext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    /* If transpiling with TypeScript: */
+    "checkJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": ".",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "outDir": "build",
+    "sourceMap": true,
+    /* If your code doesn't run in the DOM: */
+    "lib": [
+      "es2022"
+    ],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "removeComments": true,
+    "incremental": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noPropertyAccessFromIndexSignature": false,
+    /* Root directory of your codebase */
+    "rootDirs": [
+      "src"
+    ],
+    /* Set baseUrl to the root of your codebase */
+    "baseUrl": ".",
+    // /* Add your custom paths */
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true
+  },
+  /* Include src directories */
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.spec.ts",
+    "src/**/*e2e.spec.ts",
+    "scripts/**/*.ts",
+    "*.config.ts",
+    "vitest.config.*.ts"
+  ],
+  /* Exclude node_modules */
+  "exclude": [
+    "node_modules",
+    "build",
+  ]
+}
