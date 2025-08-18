@@ -1,3 +1,4 @@
+import type { UserRole } from '@/domain/entities/user';
 import type { Request, ParameterizedContext } from 'koa';
 
 /**
@@ -8,7 +9,7 @@ export type AppState = {
   user?: {
     id: string;
     jwt?: string;
-    roles?: ('admin' | 'user')[];
+    roles?: UserRole[];
   };
 };
 
