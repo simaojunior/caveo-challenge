@@ -11,7 +11,9 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "format": "eslint src/**/*.ts --fix"
+    "format": "eslint src/**/*.ts --fix",
+    "migration:run": "tsx --env-file .env src/scripts/migration.ts run",
+    "migration:revert": "tsx --env-file .env src/scripts/migration.ts revert"
   },
   "author": {
     "name": "Simão Júnior",
