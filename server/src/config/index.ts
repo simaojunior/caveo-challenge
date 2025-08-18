@@ -13,12 +13,12 @@ function loadAppEnvs() {
       }),
     BODY_LIMIT: z.coerce.number().default(15728640), // 15MB
   })
-  .transform((data) => ({
-    nodeEnv: data.NODE_ENV,
-    host: data.HOST,
-    port: data.PORT,
-    bodyLimit: data.BODY_LIMIT,
-  }));
+    .transform((data) => ({
+      nodeEnv: data.NODE_ENV,
+      host: data.HOST,
+      port: data.PORT,
+      bodyLimit: data.BODY_LIMIT,
+    }));
 
   return appEnvSchema.parse(env);
 }
@@ -31,13 +31,13 @@ function loadDatabaseEnvs() {
     DB_PASSWORD: z.string().default('caveo'),
     DB_NAME: z.string().default('caveo'),
   })
-  .transform((data) => ({
-    host: data.DB_HOST,
-    port: data.DB_PORT,
-    user: data.DB_USER,
-    password: data.DB_PASSWORD,
-    name: data.DB_NAME,
-  }));
+    .transform((data) => ({
+      host: data.DB_HOST,
+      port: data.DB_PORT,
+      user: data.DB_USER,
+      password: data.DB_PASSWORD,
+      name: data.DB_NAME,
+    }));
 
   return dbEnvSchema.parse(env);
 }
@@ -48,11 +48,11 @@ function loadRedisEnvs() {
     REDIS_PORT: z.coerce.number().default(6379),
     REDIS_PASSWORD: z.string().optional(),
   })
-  .transform((data) => ({
-    host: data.REDIS_HOST,
-    port: data.REDIS_PORT,
-    password: data.REDIS_PASSWORD,
-  }));
+    .transform((data) => ({
+      host: data.REDIS_HOST,
+      port: data.REDIS_PORT,
+      password: data.REDIS_PASSWORD,
+    }));
 
   return redisEnvSchema.parse(env);
 }
@@ -67,13 +67,13 @@ function loadAwsEnvs() {
     AWS_COGNITO_JWKS_URI: isTest ? z.string().default('https://cognito-idp.test-us.amazonaws.com/test-pool-id/.well-known/jwks.json') : z.string(),
     AWS_REGION: z.string().default('us-east-1'),
   })
-  .transform((data) => ({
-    cognitoUserPoolId: data.AWS_COGNITO_USER_POOL_ID,
-    cognitoClientSecret: data.AWS_COGNITO_CLIENT_SECRET,
-    cognitoClientId: data.AWS_COGNITO_CLIENT_ID,
-    cognitoJwksUri: data.AWS_COGNITO_JWKS_URI,
-    region: data.AWS_REGION,
-  }));
+    .transform((data) => ({
+      cognitoUserPoolId: data.AWS_COGNITO_USER_POOL_ID,
+      cognitoClientSecret: data.AWS_COGNITO_CLIENT_SECRET,
+      cognitoClientId: data.AWS_COGNITO_CLIENT_ID,
+      cognitoJwksUri: data.AWS_COGNITO_JWKS_URI,
+      region: data.AWS_REGION,
+    }));
 
   return awsEnvSchema.parse(env);
 }
@@ -85,10 +85,10 @@ function loadAuthEnvs() {
     JWT_SECRET: isTest ? z.string().default('test-jwt-secret-key-for-e2e') : z.string(),
     JWT_EXPECTED_ISSUER: isTest ? z.string().default('https://cognito-idp.us-east-1.amazonaws.com/test-pool-id') : z.string(),
   })
-  .transform((data) => ({
-    jwtSecret: data.JWT_SECRET,
-    jwtExpectedIssuer: data.JWT_EXPECTED_ISSUER,
-  }));
+    .transform((data) => ({
+      jwtSecret: data.JWT_SECRET,
+      jwtExpectedIssuer: data.JWT_EXPECTED_ISSUER,
+    }));
 
   return authEnvSchema.parse(env);
 }
@@ -99,11 +99,11 @@ function loadLoggingEnvs() {
     APP_NAME: z.string().default('caveo-api'),
     LOG_ENVIRONMENT: z.string().default('development'),
   })
-  .transform((data) => ({
-    level: data.LOG_LEVEL,
-    appName: data.APP_NAME,
-    environment: data.LOG_ENVIRONMENT,
-  }));
+    .transform((data) => ({
+      level: data.LOG_LEVEL,
+      appName: data.APP_NAME,
+      environment: data.LOG_ENVIRONMENT,
+    }));
 
   return loggingEnvSchema.parse(env);
 }
