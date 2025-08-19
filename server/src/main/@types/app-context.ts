@@ -13,9 +13,9 @@ export type AppState = {
   };
 };
 
-export interface IAppRequest<RequestBodyT = any> extends Request {
+export interface IAppRequest<RequestBodyT = unknown> extends Request {
   body?: RequestBodyT;
-  files?: Record<string, any>;
+  files?: Record<string, unknown>;
 }
 
 export interface IAppDefaultContext<RequestBodyT>
