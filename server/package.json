@@ -12,6 +12,9 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "eslint src/**/*.ts --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
     "migration:run": "tsx --env-file .env src/scripts/migration.ts run",
     "migration:revert": "tsx --env-file .env src/scripts/migration.ts revert"
   },
