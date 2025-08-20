@@ -4,6 +4,7 @@ import { setupRoutes } from './routes';
 
 export const createApp = (): Koa => {
   const app = new Koa();
+
   setupMiddlewares(app);
   setupRoutes(app);
 
