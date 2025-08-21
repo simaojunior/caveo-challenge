@@ -14,8 +14,8 @@ export class User {
   @PrimaryColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  name!: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  name?: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   @Index('idx_user_email')
