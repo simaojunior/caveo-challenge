@@ -1,0 +1,9 @@
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is git-ignored for security
+
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Application Configuration
+app_name    = "caveo-backend"
+environment = "dev"
