@@ -54,44 +54,39 @@ export const setupSigninOrRegister: Setup = (
       };
     }
 
-    const user = User.create({
-      email,
-      role,
-      name,
-    });
+    const user = await saga.run(async () => {
+      const user = User.create({
+        email,
+        role,
+        name,
+      });
 
-    const { externalId } = await authGateway.registerUser({
-      email,
-      password,
-      internalId: user.id,
-    });
+      const { externalId } = await authGateway.registerUser({
+        email,
+        password,
+        internalId: user.id,
+      });
 
-    saga.addCompensation(async () => {
-      await authGateway.removeUser({ userId: externalId });
-    });
+      saga.addCompensation(async () => {
+        await authGateway.removeUser({ userId: externalId });
+      });
 
-    await authGateway.addUserToRole({
-      username: email,
-      roleName: user.role,
-    });
+      user.setExternalId(externalId);
 
-    saga.addCompensation(async () => {
-      await authGateway.removeUserFromRole({
+      await authGateway.addUserToRole({
         username: email,
         roleName: user.role,
       });
+
+      await userRepo.createUser(user);
+
+      return user;
     });
 
     const {
       accessToken,
       refreshToken,
     } = await authGateway.authenticateUser({ email, password });
-
-    user.setExternalId(externalId);
-
-    await saga.run(async () => {
-      await userRepo.createUser(user);
-    });
 
     return {
       isOnboarded: user.isOnboarded,
