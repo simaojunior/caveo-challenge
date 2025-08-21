@@ -1,0 +1,102 @@
+import { User, type  UserRole } from '@/domain/entities/user';
+import type { ICreateUser, IFindUserByEmail } from '@/domain/contracts/repos/user';
+import type {
+  IAddUserToRole,
+  IAuthenticateUser,
+  IRegisterUser,
+  IRemoveUserFromRole,
+  IRemoveUser,
+} from '@/domain/contracts/gateways/auth';
+import type { IAddCompensation, IRun } from '@/domain/contracts/patterns/saga';
+
+type Input = {
+  email: string;
+  password: string;
+  role?: UserRole;
+  name?: string;
+};
+
+type Output = {
+  accessToken: string;
+  refreshToken: string;
+  isOnboarded: boolean
+};
+
+export type SigninOrRegisterUseCase = (input: Input) => Promise<Output>;
+
+type Setup = (
+  userRepo: IFindUserByEmail & ICreateUser,
+  authGateway: IAuthenticateUser & IRegisterUser & IAddUserToRole &
+    IRemoveUserFromRole & IRemoveUser,
+  saga: IAddCompensation & IRun
+) => SigninOrRegisterUseCase;
+
+export const setupSigninOrRegister: Setup = (
+  userRepo,
+  authGateway,
+  saga,
+) => {
+  return async (input) => {
+    const { email, password, role, name } = input;
+
+    const existingUser = await userRepo.findUserByEmail({ email });
+
+    if (existingUser) {
+      const {
+        accessToken,
+        refreshToken,
+      } = await authGateway.authenticateUser({ email, password });
+
+      return {
+        isOnboarded: existingUser.isOnboarded,
+        accessToken,
+        refreshToken,
+      };
+    }
+
+    const user = User.create({
+      email,
+      role,
+      name,
+    });
+
+    const { externalId } = await authGateway.registerUser({
+      email,
+      password,
+      internalId: user.id,
+    });
+
+    saga.addCompensation(async () => {
+      await authGateway.removeUser({ userId: externalId });
+    });
+
+    await authGateway.addUserToRole({
+      username: email,
+      roleName: user.role,
+    });
+
+    saga.addCompensation(async () => {
+      await authGateway.removeUserFromRole({
+        username: email,
+        roleName: user.role,
+      });
+    });
+
+    const {
+      accessToken,
+      refreshToken,
+    } = await authGateway.authenticateUser({ email, password });
+
+    user.setExternalId(externalId);
+
+    await saga.run(async () => {
+      await userRepo.createUser(user);
+    });
+
+    return {
+      isOnboarded: user.isOnboarded,
+      accessToken,
+      refreshToken,
+    };
+  };
+};
