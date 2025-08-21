@@ -42,7 +42,7 @@ export namespace FindUser {
 
   export type Output = {
     id: string;
-    name: string;
+    name?: string;
     email: string;
     role: UserRole;
     isOnboarded: boolean;
@@ -65,7 +65,7 @@ export namespace FindUserByEmail {
 
   export type Output = {
     id: string;
-    name: string;
+    name?: string;
     email: string;
     role: UserRole;
     isOnboarded: boolean;
@@ -88,7 +88,7 @@ export namespace FindUserByExternalId {
 
   export type Output = {
     id: string;
-    name: string;
+    name?: string;
     email: string;
     role: UserRole;
     isOnboarded: boolean;
@@ -117,7 +117,7 @@ export namespace SearchUsers {
   export type Output = {
     users: {
       id: string;
-      name: string;
+      name?: string;
       email: string;
       role: UserRole;
       isOnboarded: boolean;
