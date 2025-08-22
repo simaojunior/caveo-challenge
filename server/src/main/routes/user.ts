@@ -1,7 +1,10 @@
 import type Router from '@koa/router';
+
+import { auth, authorize } from '@/main/middlewares';
 import { adaptKoaRoute as adapt } from '@/main/adapters/koa-router';
-import { makeSigninOrRegisterController } from '../factories/application/controllers';
+import { makeEditAccountController, makeGetMeController } from '../factories/application/controllers';
 
 export const setupUserRoutes = (router: Router): void => {
-  router.post('/v1/auth', adapt(makeSigninOrRegisterController()));
+  router.get('/me', auth, authorize, adapt(makeGetMeController()));
+  router.put('/edit-account', auth, authorize, adapt(makeEditAccountController()));
 };
