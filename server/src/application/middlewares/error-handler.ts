@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { httpResponse } from '@/application/helpers/http';
 import type { HttpResponse, IErrorHandler } from '@/application/contracts';
 import { UnauthorizedError, ForbiddenError, ResourceNotFound, ApplicationError } from '@/application/errors';
-import { DomainError } from '@/domain/errors';
+import { DomainError, InsufficientPermissionsError } from '@/domain/errors';
 
 interface IErrorStrategy {
   canHandle(error: Error): boolean;
@@ -57,6 +57,10 @@ class DomainErrorStrategy implements IErrorStrategy {
   }
 
   handle(error: Error): HttpResponse {
+    if (error instanceof InsufficientPermissionsError) {
+      return httpResponse.forbidden(error);
+    }
+
     return httpResponse.badRequest(error);
   }
 }
