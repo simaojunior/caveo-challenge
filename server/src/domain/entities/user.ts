@@ -99,4 +99,18 @@ export class User {
     this.props.externalId = externalId;
     this.touch();
   }
+
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      role: this.role,
+      isOnboarded: this.isOnboarded,
+      externalId: this.externalId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      deletedAt: this.deletedAt,
+    };
+  }
 }
