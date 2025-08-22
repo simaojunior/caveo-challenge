@@ -10,7 +10,7 @@ const inputSchema = z.object({
   roles: z.array(z.enum(UserRole)),
 });
 
-export class GetMe extends Controller {
+export class GetMeController extends Controller {
   constructor(private readonly getMeUseCase: GetMeUseCase) {
     super();
   }
