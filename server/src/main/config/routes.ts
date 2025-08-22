@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import Router from '@koa/router';
 
-import { setupHealthRoutes, setupAuthRoutes } from '../routes';
+import { setupHealthRoutes, setupAuthRoutes, setupUserRoutes } from '../routes';
 
 export const setupRoutes = (app: Koa): void => {
   const router = new Router();
@@ -9,6 +9,7 @@ export const setupRoutes = (app: Koa): void => {
 
   setupHealthRoutes(router);
   setupAuthRoutes(router);
+  setupUserRoutes(router);
 
   app.use(router.routes());
   app.use(router.allowedMethods());
