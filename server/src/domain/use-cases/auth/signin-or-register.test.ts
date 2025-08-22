@@ -91,6 +91,7 @@ describe('SigninOrRegister UseCase', () => {
       // Assert
       expect(result).toEqual({
         isOnboarded: false,
+        isNewUser: true,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
@@ -197,6 +198,7 @@ describe('SigninOrRegister UseCase', () => {
       // Assert
       expect(result).toEqual({
         isOnboarded: true,
+        isNewUser: false,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
@@ -282,6 +284,7 @@ describe('SigninOrRegister UseCase', () => {
       // Assert
       expect(result).toEqual({
         isOnboarded: false,
+        isNewUser: false,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
