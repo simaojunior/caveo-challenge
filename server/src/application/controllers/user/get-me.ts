@@ -23,6 +23,11 @@ export class GetMeController extends Controller {
       roles,
     });
 
-    return httpResponse.ok(user);
+    return httpResponse.ok({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      isOnboarded: user.isOnboarded,
+    });
   }
 }
