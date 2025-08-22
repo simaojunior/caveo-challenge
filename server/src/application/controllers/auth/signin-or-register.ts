@@ -17,7 +17,7 @@ const inputSchema = z.object({
   role: z.enum(UserRole).optional(),
 });
 
-export class SigninOrRegister extends Controller {
+export class SigninOrRegisterController extends Controller {
   constructor(
     private readonly signinOrRegisterUseCase: SigninOrRegisterUseCase,
   ) {
