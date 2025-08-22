@@ -8,9 +8,6 @@ export type AuthenticatedUser = {
   id: string;
   roles: UserRole[];
   jwt?: string;
-  email?: string;
-  name?: string;
-  isOnboarded?: boolean;
 };
 
 export type HttpRequest = {
