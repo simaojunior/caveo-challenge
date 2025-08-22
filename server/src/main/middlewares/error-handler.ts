@@ -1,12 +1,12 @@
 import type { Next, ParameterizedContext } from 'koa';
 
-import { HttpErrorHandler } from '@/application/middlewares/error-handler';
 import { createModuleLogger } from '@/infra/shared/logging/logger';
+import { makeErrorHandler } from '../factories/application/middlewares/error-handler';
 
 const logger = createModuleLogger('error-middleware');
 
 export const ErrorMiddleware = () => {
-  const errorHandler = new HttpErrorHandler();
+  const errorHandler = makeErrorHandler();
 
   return async (ctx: ParameterizedContext, next: Next) => {
     try {

@@ -12,8 +12,10 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "eslint src/**/*.ts --fix",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --exclude='**/*.e2e.test.ts'",
+    "test:e2e": "vitest run src/main/routes/*.e2e.test.ts",
+    "test:watch": "vitest --exclude='**/*.e2e.test.ts'",
+    "test:e2e:watch": "vitest src/**/*.e2e.test.ts",
     "test:cov": "vitest run --coverage",
     "migration:run": "tsx --env-file .env scripts/migration.ts run",
     "migration:revert": "tsx --env-file .env scripts/migration.ts revert"
@@ -55,6 +57,7 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.865.0",
     "@koa/router": "^14.0.0",
+    "jose": "^6.0.13",
     "koa": "^3.0.1",
     "koa-body": "^6.0.1",
     "pg": "^8.16.3",
