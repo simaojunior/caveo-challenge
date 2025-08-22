@@ -19,7 +19,8 @@ type Input = {
 type Output = {
   accessToken: string;
   refreshToken: string;
-  isOnboarded: boolean
+  isOnboarded: boolean;
+  isNewUser: boolean;
 };
 
 export type SigninOrRegisterUseCase = (input: Input) => Promise<Output>;
@@ -49,6 +50,7 @@ export const setupSigninOrRegister: Setup = (
 
       return {
         isOnboarded: existingUser.isOnboarded,
+        isNewUser: false,
         accessToken,
         refreshToken,
       };
@@ -90,6 +92,7 @@ export const setupSigninOrRegister: Setup = (
 
     return {
       isOnboarded: user.isOnboarded,
+      isNewUser: true,
       accessToken,
       refreshToken,
     };
