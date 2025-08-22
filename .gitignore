@@ -192,4 +192,4 @@ terraform/.terraform/
 terraform.tfvars
 *.tfplan
 *.tfplan.*
-terraform/*.zip
+*.zip
