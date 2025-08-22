@@ -9,7 +9,7 @@ import {
 import type { EditAccountUseCase } from '@/domain/use-cases';
 
 const inputSchema = z.object({
-  userId: z.uuid(),
+  userId: z.uuid().optional(),
   name: z.string().min(1, 'Name must not be empty').optional(),
   role: z.enum(UserRole).optional(),
 }).refine(
