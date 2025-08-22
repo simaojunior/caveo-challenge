@@ -20,7 +20,7 @@ const inputSchema = z.object({
   },
 );
 
-export class EditAccount extends Controller {
+export class EditAccountController extends Controller {
   constructor(private readonly editAccountUseCase: EditAccountUseCase) {
     super();
   }
