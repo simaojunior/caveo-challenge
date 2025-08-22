@@ -31,8 +31,13 @@ export class SigninOrRegister extends Controller {
       accessToken,
       refreshToken,
       isOnboarded,
+      isNewUser,
     } = await this.signinOrRegisterUseCase({ email, password, name, role });
 
-    return httpResponse.created({ accessToken, refreshToken, isOnboarded });
+    if (isNewUser) {
+      return httpResponse.created({ accessToken, refreshToken, isOnboarded });
+    }
+
+    return httpResponse.ok({ accessToken, refreshToken, isOnboarded });
   }
 }
