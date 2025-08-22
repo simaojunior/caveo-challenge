@@ -1,2 +1,3 @@
-export * from './health-check';
 export * from './auth';
+export * from './user';
+export * from './health-check';
