@@ -15,11 +15,11 @@ type Output = {
   isOnboarded: boolean
 }
 
-export type MeUseCase = (input: Input) => Promise<Output>;
+export type GetMeUseCase = (input: Input) => Promise<Output>;
 
-type Setup = (userRepo: IFindUser) => MeUseCase;
+type Setup = (userRepo: IFindUser) => GetMeUseCase;
 
-export const setupMe: Setup = (userRepo) => {
+export const setupGetMe: Setup = (userRepo) => {
   return async ({ id }) => {
     const user = await userRepo.findUser({ id });
 
