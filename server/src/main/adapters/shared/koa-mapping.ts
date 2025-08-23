@@ -1,11 +1,11 @@
-import type { HttpRequest } from '@/application/contracts';
+import type { HttpRequest, AnyObject } from '@/application/contracts';
 import type { IAppContext } from '@/main/@types/app-context';
 
 /**
  * Maps Koa context to HttpRequest format
  * Centralizes the request mapping logic to avoid duplication across adapters
  */
-export const mapKoaContextToHttpRequest = <T = unknown>(
+export const mapKoaContextToHttpRequest = <T extends AnyObject = AnyObject>(
   ctx: IAppContext<T>,
 ): HttpRequest => ({
     body: ctx.request.body,
