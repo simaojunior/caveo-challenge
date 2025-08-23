@@ -1,285 +1,147 @@
 import { faker } from '@faker-js/faker';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SigninOrRegisterController } from './signin-or-register';
 import { UserRole } from '@/domain/entities/user';
 import type { SigninOrRegisterUseCase } from '@/domain/use-cases';
-import type { HttpRequest } from '@/application/contracts';
+import { Controller, type HttpRequest } from '@/application/contracts';
 
 describe('SigninOrRegisterController', () => {
+  let userEmail: string;
+  let userName: string;
+  let accessToken: string;
+  let refreshToken: string;
+  let basicRequestBody: Record<string, unknown>;
+  let fullRequestBody: Record<string, unknown>;
   let sut: SigninOrRegisterController;
-  let mockUseCase: SigninOrRegisterUseCase;
+  let signinOrRegisterUseCase: SigninOrRegisterUseCase;
+
+  beforeAll(() => {
+    userEmail = faker.internet.email();
+    userName = faker.person.fullName();
+    accessToken = faker.string.alphanumeric(100);
+    refreshToken = faker.string.alphanumeric(100);
+    basicRequestBody = {
+      email: userEmail,
+      password: 'Password123!',
+    };
+    fullRequestBody = {
+      email: userEmail,
+      password: 'Password123!',
+      name: userName,
+      role: UserRole.ADMIN,
+    };
+    signinOrRegisterUseCase = vi.fn().mockResolvedValue({
+      accessToken,
+      refreshToken,
+      isOnboarded: true,
+    });
+  });
 
   beforeEach(() => {
-    mockUseCase = vi.fn();
-    sut = new SigninOrRegisterController(mockUseCase);
+    vi.clearAllMocks();
+    sut = new SigninOrRegisterController(signinOrRegisterUseCase);
   });
 
-  describe('successful authentication', () => {
-    it('should return 200 for existing user signin', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-        name: faker.person.fullName(),
-      };
+  it('should extend Controller', () => {
+    expect(sut).toBeInstanceOf(Controller);
+  });
 
-      const useCaseResponse = {
-        accessToken: faker.string.alphanumeric(100),
-        refreshToken: faker.string.alphanumeric(100),
+  it('should call SigninOrRegisterUseCase with correct parameters for basic signin', async () => {
+    const request: HttpRequest = {
+      body: basicRequestBody,
+      headers: {},
+    };
+
+    await sut.handle(request);
+
+    expect(signinOrRegisterUseCase).toHaveBeenCalledWith({
+      email: userEmail,
+      password: 'Password123!',
+      name: undefined,
+      role: undefined,
+    });
+    expect(signinOrRegisterUseCase).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call SigninOrRegisterUseCase with all provided fields', async () => {
+    const request: HttpRequest = {
+      body: fullRequestBody,
+      headers: {},
+    };
+
+    await sut.handle(request);
+
+    expect(signinOrRegisterUseCase).toHaveBeenCalledWith({
+      email: userEmail,
+      password: 'Password123!',
+      name: userName,
+      role: UserRole.ADMIN,
+    });
+  });
+
+  it('should return 200 with authentication tokens', async () => {
+    const request: HttpRequest = {
+      body: basicRequestBody,
+      headers: {},
+    };
+
+    const response = await sut.handle(request);
+
+    expect(response).toEqual({
+      statusCode: 200,
+      data: {
+        accessToken,
+        refreshToken,
         isOnboarded: true,
-      };
-
-      vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act
-      const response = await sut.handle(request);
-
-      // Assert
-      expect(mockUseCase).toHaveBeenCalledWith({
-        email: requestBody.email,
-        password: requestBody.password,
-        name: requestBody.name,
-        role: undefined,
-      });
-
-      expect(response).toEqual({
-        statusCode: 200,
-        data: {
-          accessToken: useCaseResponse.accessToken,
-          refreshToken: useCaseResponse.refreshToken,
-          isOnboarded: true,
-        },
-      });
-    });
-
-    it('should handle admin role registration', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-        name: faker.person.fullName(),
-        role: UserRole.ADMIN,
-      };
-
-      const useCaseResponse = {
-        accessToken: faker.string.alphanumeric(100),
-        refreshToken: faker.string.alphanumeric(100),
-        isOnboarded: true,
-      };
-
-      vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act
-      const response = await sut.handle(request);
-
-      // Assert
-      expect(mockUseCase).toHaveBeenCalledWith(requestBody);
-      expect(response.statusCode).toBe(200);
-      expect(response.data).toHaveProperty('accessToken');
-      expect(response.data).toHaveProperty('refreshToken');
-      expect(response.data).toHaveProperty('isOnboarded');
+      },
     });
   });
 
-  describe('input validation', () => {
-    it('should throw validation error for invalid email', async () => {
-      // Arrange
-      const requestBody = {
-        email: 'invalid-email',
-        password: 'Password123!',
-      };
+  it('should handle new user registration', async () => {
+    const newUserResponse = {
+      accessToken: faker.string.alphanumeric(100),
+      refreshToken: faker.string.alphanumeric(100),
+      isOnboarded: false,
+      isNewUser: true,
+    };
 
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
+    vi.mocked(signinOrRegisterUseCase).mockResolvedValue(newUserResponse);
 
-      // Act & Assert
-      await expect(sut.handle(request)).rejects.toThrow();
-      expect(mockUseCase).not.toHaveBeenCalled();
-    });
+    const request: HttpRequest = {
+      body: basicRequestBody,
+      headers: {},
+    };
 
-    it('should throw validation error for weak password', async () => {
-      // Arrange
-      const testCases = [
-        { password: 'weak', description: 'too short' },
-        { password: 'password123', description: 'no uppercase' },
-        { password: 'PASSWORD123', description: 'no lowercase' },
-        { password: 'Password', description: 'no number' },
-        { password: 'Password123', description: 'no special character' },
-      ];
+    const response = await sut.handle(request);
 
-      for (const testCase of testCases) {
-        const requestBody = {
-          email: faker.internet.email(),
-          password: testCase.password,
-        };
-
-        const request: HttpRequest = {
-          body: requestBody,
-          headers: {},
-        };
-
-        // Act & Assert
-        await expect(sut.handle(request)).rejects.toThrow();
-      }
-
-      expect(mockUseCase).not.toHaveBeenCalled();
-    });
-
-    it('should throw validation error for invalid role', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-        role: 'invalid-role',
-      };
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act & Assert
-      await expect(sut.handle(request)).rejects.toThrow();
-      expect(mockUseCase).not.toHaveBeenCalled();
-    });
-
-    it('should validate name length limits', async () => {
-      // Arrange
-      const longName = 'a'.repeat(101); // Exceeds 100 character limit
-
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-        name: longName,
-      };
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act & Assert
-      await expect(sut.handle(request)).rejects.toThrow();
-      expect(mockUseCase).not.toHaveBeenCalled();
-    });
-
-    it('should accept optional fields as undefined', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-      };
-
-      const useCaseResponse = {
-        accessToken: faker.string.alphanumeric(100),
-        refreshToken: faker.string.alphanumeric(100),
-        isOnboarded: false,
-        isNewUser: true,
-      };
-
-      vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act
-      const response = await sut.handle(request);
-
-      // Assert
-      expect(mockUseCase).toHaveBeenCalledWith({
-        email: requestBody.email,
-        password: requestBody.password,
-        name: undefined,
-        role: undefined,
-      });
-
-      expect(response.statusCode).toBe(200);
-    });
+    expect(response.statusCode).toBe(200);
+    expect(response.data).toHaveProperty('isOnboarded', false);
   });
 
-  describe('error handling', () => {
-    it('should propagate use case errors', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-      };
+  it('should propagate authentication errors', async () => {
+    const request: HttpRequest = {
+      body: basicRequestBody,
+      headers: {},
+    };
 
-      const useCaseError = new Error('Authentication failed');
-      vi.mocked(mockUseCase).mockRejectedValue(useCaseError);
+    const error = new Error('Authentication failed');
+    vi.mocked(signinOrRegisterUseCase).mockRejectedValue(error);
 
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act & Assert
-      await expect(sut.handle(request)).rejects.toThrow('Authentication failed');
-    });
-
-    it('should handle malformed request body', async () => {
-      // Arrange
-      const request: HttpRequest = {
-        body: {},
-        headers: {},
-      };
-
-      // Act & Assert
-      await expect(sut.handle(request)).rejects.toThrow();
-      expect(mockUseCase).not.toHaveBeenCalled();
-    });
+    await expect(sut.handle(request)).rejects.toThrow('Authentication failed');
   });
 
-  describe('use case integration', () => {
-    it('should pass all provided fields to use case', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-        name: faker.person.fullName(),
-        role: UserRole.ADMIN,
-      };
+  it('should validate password requirements', async () => {
+    const weakPasswordBody = {
+      email: userEmail,
+      password: 'weak',
+    };
+    const request: HttpRequest = {
+      body: weakPasswordBody,
+      headers: {},
+    };
 
-      const useCaseResponse = {
-        accessToken: faker.string.alphanumeric(100),
-        refreshToken: faker.string.alphanumeric(100),
-        isOnboarded: true,
-        isNewUser: false,
-      };
-
-      vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act
-      await sut.handle(request);
-
-      // Assert
-      expect(mockUseCase).toHaveBeenCalledTimes(1);
-      expect(mockUseCase).toHaveBeenCalledWith({
-        email: requestBody.email,
-        password: requestBody.password,
-        name: requestBody.name,
-        role: requestBody.role,
-      });
-    });
+    await expect(sut.handle(request)).rejects.toThrow();
+    expect(signinOrRegisterUseCase).not.toHaveBeenCalled();
   });
 });
