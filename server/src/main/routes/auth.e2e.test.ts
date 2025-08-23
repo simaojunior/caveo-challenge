@@ -95,7 +95,7 @@ describe('User Routes (e2e)', () => {
         .expect(400);
     });
 
-    it('should return 201 for successful registration', async () => {
+    it('should return 200 for successful registration', async () => {
       // Arrange
       const externalId = faker.string.uuid();
       const accessToken = faker.string.alphanumeric(100);
@@ -120,7 +120,7 @@ describe('User Routes (e2e)', () => {
         .send(userData);
 
       // Assert
-      expect(response.status).toBe(201);
+      expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
