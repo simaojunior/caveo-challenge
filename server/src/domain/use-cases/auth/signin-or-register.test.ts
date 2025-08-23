@@ -91,7 +91,6 @@ describe('SigninOrRegister UseCase', () => {
       // Assert
       expect(result).toEqual({
         isOnboarded: false,
-        isNewUser: true,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
@@ -168,7 +167,7 @@ describe('SigninOrRegister UseCase', () => {
       await expect(sut(input)).rejects.toThrow(originalError);
       expect(mockAuthGateway.removeUser).toHaveBeenCalled();
     });
-  });  describe('existing user signin', () => {
+  }); describe('existing user signin', () => {
     it('should authenticate existing user without creating saga', async () => {
       // Arrange
       const input = {
@@ -198,7 +197,6 @@ describe('SigninOrRegister UseCase', () => {
       // Assert
       expect(result).toEqual({
         isOnboarded: true,
-        isNewUser: false,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
@@ -284,7 +282,6 @@ describe('SigninOrRegister UseCase', () => {
       // Assert
       expect(result).toEqual({
         isOnboarded: false,
-        isNewUser: false,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       });
