@@ -1,5 +1,21 @@
 import type { UserRole } from '@/domain/entities/user';
 
+export enum ItemPerPage {
+  FIVE = 5,
+  TEN = 10,
+  FIFTEEN = 15,
+  TWENTY = 20,
+  TWENTY_FIVE = 25,
+  FIFTY = 50
+}
+
+export type Meta = {
+  total: number
+  itemsPerPage: number
+  totalPages: number
+  page: number
+}
+
 export interface ICreateUser {
   createUser: (input: CreateUser.Input) => Promise<void>;
 }
@@ -99,7 +115,7 @@ export namespace FindUserByExternalId {
 }
 
 export interface ISearchUsers {
-  searchUsers: (input: SearchUsers.Input) => Promise<SearchUsers.Output>;
+  searchUsers: (input: SearchUsers.Input) => Promise<SearchUsers.Result>;
 }
 
 export namespace SearchUsers {
@@ -109,22 +125,24 @@ export namespace SearchUsers {
     role?: UserRole;
     isOnboarded?: boolean;
     pagination: {
-      itemsPerPage: number;
+      itemsPerPage: ItemPerPage;
       page: number;
     };
   };
 
   export type Output = {
-    users: {
-      id: string;
-      name?: string;
-      email: string;
-      role: UserRole;
-      isOnboarded: boolean;
-      createdAt: Date;
-      updatedAt?: Date;
-      deletedAt?: Date | null;
-    }[];
-    totalCount: number;
+    id: string;
+    name?: string;
+    email: string;
+    role: UserRole;
+    isOnboarded: boolean;
+    createdAt: Date;
+    updatedAt?: Date;
+    deletedAt?: Date | null;
+  };
+
+  export type Result = {
+    users: Output[];
+    meta: Meta;
   };
 }
