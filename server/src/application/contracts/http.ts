@@ -1,8 +1,6 @@
+import type * as http from 'http';
 import type { UserRole } from '@/domain/entities/user';
-
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-
-export type HttpHeaders = Record<string, string | string[] | undefined>;
 
 export type AuthenticatedUser = {
   id: string;
@@ -10,11 +8,13 @@ export type AuthenticatedUser = {
   jwt?: string;
 };
 
+export type AnyObject = Record<string, unknown>;
+
 export type HttpRequest = {
-  body?: unknown;
-  query?: unknown;
-  params?: unknown;
-  headers?: HttpHeaders;
+  body?: AnyObject;
+  query?: AnyObject;
+  params?: AnyObject;
+  headers?: http.IncomingHttpHeaders;
   user?: AuthenticatedUser;
   method?: HttpMethod;
   path?: string;
