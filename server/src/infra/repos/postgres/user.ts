@@ -1,6 +1,6 @@
 import { PgRepository } from './repository';
 import { User } from '@/infra/repos/postgres/entities/user';
-import type  {
+import type {
   CreateUser,
   IUpdateUser,
   ICreateUser,
@@ -14,17 +14,17 @@ import type  {
   FindUserByExternalId,
   UpdateUser,
 } from '@/domain/contracts/repos/user';
-import type  { PgConnection } from './helpers/connection';
+import type { PgConnection } from './helpers/connection';
 
 export class UserRepository
   extends PgRepository
   implements
-    ICreateUser,
-    IUpdateUser,
-    IFindUserByEmail,
-    IFindUserByExternalId,
-    IFindUser,
-    ISearchUsers {
+  ICreateUser,
+  IUpdateUser,
+  IFindUserByEmail,
+  IFindUserByExternalId,
+  IFindUser,
+  ISearchUsers {
   constructor(repository: PgConnection) {
     super(repository);
   }
@@ -116,12 +116,12 @@ export class UserRepository
     };
   }
 
-  async searchUsers(input: SearchUsers.Input): Promise<SearchUsers.Output> {
+  async searchUsers(input: SearchUsers.Input): Promise<SearchUsers.Result> {
     const { name, email, role, isOnboarded, pagination } = input;
 
     const repository = this.getRepository(User);
 
-    const [users, totalCount] = await repository.findAndCount({
+    const [users, total] = await repository.findAndCount({
       where: {
         ...(name && { name }),
         ...(email && { email }),
@@ -131,6 +131,8 @@ export class UserRepository
       take: pagination.itemsPerPage,
       skip: pagination.itemsPerPage * (pagination.page - 1),
     });
+
+    const totalPages = Math.ceil(total / pagination.itemsPerPage);
 
     return {
       users: users.map(user => ({
@@ -143,7 +145,12 @@ export class UserRepository
         updatedAt: user.updatedAt,
         deletedAt: user.deletedAt,
       })),
-      totalCount,
+      meta: {
+        total,
+        itemsPerPage: pagination.itemsPerPage,
+        totalPages,
+        page: pagination.page,
+      },
     };
   }
 }
