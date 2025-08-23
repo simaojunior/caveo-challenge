@@ -109,6 +109,7 @@ describe('User Routes (e2e)', () => {
         id: userId,
         email: userData.email,
         name: userData.name,
+        role: userData.role,
         isOnboarded: true,
       });
     });
