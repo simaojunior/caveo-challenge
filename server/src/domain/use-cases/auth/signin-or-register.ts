@@ -1,10 +1,9 @@
-import { User, type  UserRole } from '@/domain/entities/user';
+import { User, type UserRole } from '@/domain/entities/user';
 import type { ICreateUser, IFindUserByEmail } from '@/domain/contracts/repos/user';
 import type {
   IAddUserToRole,
   IAuthenticateUser,
   IRegisterUser,
-  IRemoveUserFromRole,
   IRemoveUser,
 } from '@/domain/contracts/gateways/auth';
 import type { IAddCompensation, IRun } from '@/domain/contracts/patterns/saga';
@@ -20,15 +19,13 @@ type Output = {
   accessToken: string;
   refreshToken: string;
   isOnboarded: boolean;
-  isNewUser: boolean;
 };
 
 export type SigninOrRegisterUseCase = (input: Input) => Promise<Output>;
 
 type Setup = (
   userRepo: IFindUserByEmail & ICreateUser,
-  authGateway: IAuthenticateUser & IRegisterUser & IAddUserToRole &
-    IRemoveUserFromRole & IRemoveUser,
+  authGateway: IAuthenticateUser & IRegisterUser & IAddUserToRole & IRemoveUser,
   saga: IAddCompensation & IRun
 ) => SigninOrRegisterUseCase;
 
@@ -50,7 +47,6 @@ export const setupSigninOrRegister: Setup = (
 
       return {
         isOnboarded: existingUser.isOnboarded,
-        isNewUser: false,
         accessToken,
         refreshToken,
       };
@@ -92,7 +88,6 @@ export const setupSigninOrRegister: Setup = (
 
     return {
       isOnboarded: user.isOnboarded,
-      isNewUser: true,
       accessToken,
       refreshToken,
     };
