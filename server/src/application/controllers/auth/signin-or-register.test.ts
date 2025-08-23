@@ -28,7 +28,6 @@ describe('SigninOrRegisterController', () => {
         accessToken: faker.string.alphanumeric(100),
         refreshToken: faker.string.alphanumeric(100),
         isOnboarded: true,
-        isNewUser: false,
       };
 
       vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
@@ -59,45 +58,6 @@ describe('SigninOrRegisterController', () => {
       });
     });
 
-    it('should return 201 for new user registration', async () => {
-      // Arrange
-      const requestBody = {
-        email: faker.internet.email(),
-        password: 'Password123!',
-        name: faker.person.fullName(),
-        role: UserRole.USER,
-      };
-
-      const useCaseResponse = {
-        accessToken: faker.string.alphanumeric(100),
-        refreshToken: faker.string.alphanumeric(100),
-        isOnboarded: false,
-        isNewUser: true,
-      };
-
-      vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
-
-      const request: HttpRequest = {
-        body: requestBody,
-        headers: {},
-      };
-
-      // Act
-      const response = await sut.handle(request);
-
-      // Assert
-      expect(mockUseCase).toHaveBeenCalledWith(requestBody);
-
-      expect(response).toEqual({
-        statusCode: 201,
-        data: {
-          accessToken: useCaseResponse.accessToken,
-          refreshToken: useCaseResponse.refreshToken,
-          isOnboarded: false,
-        },
-      });
-    });
-
     it('should handle admin role registration', async () => {
       // Arrange
       const requestBody = {
@@ -111,7 +71,6 @@ describe('SigninOrRegisterController', () => {
         accessToken: faker.string.alphanumeric(100),
         refreshToken: faker.string.alphanumeric(100),
         isOnboarded: true,
-        isNewUser: true,
       };
 
       vi.mocked(mockUseCase).mockResolvedValue(useCaseResponse);
@@ -126,7 +85,7 @@ describe('SigninOrRegisterController', () => {
 
       // Assert
       expect(mockUseCase).toHaveBeenCalledWith(requestBody);
-      expect(response.statusCode).toBe(201);
+      expect(response.statusCode).toBe(200);
       expect(response.data).toHaveProperty('accessToken');
       expect(response.data).toHaveProperty('refreshToken');
       expect(response.data).toHaveProperty('isOnboarded');
@@ -249,7 +208,7 @@ describe('SigninOrRegisterController', () => {
         role: undefined,
       });
 
-      expect(response.statusCode).toBe(201);
+      expect(response.statusCode).toBe(200);
     });
   });
 
@@ -276,7 +235,7 @@ describe('SigninOrRegisterController', () => {
     it('should handle malformed request body', async () => {
       // Arrange
       const request: HttpRequest = {
-        body: null,
+        body: {},
         headers: {},
       };
 
