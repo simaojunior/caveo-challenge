@@ -1,3 +1,4 @@
+import type { AnyObject } from '@/application/contracts';
 import type { UserRole } from '@/domain/entities/user';
 import type { Request, ParameterizedContext } from 'koa';
 
@@ -13,7 +14,7 @@ export type AppState = {
   };
 };
 
-export interface IAppRequest<RequestBodyT = unknown> extends Request {
+export interface IAppRequest<RequestBodyT = AnyObject> extends Request {
   body?: RequestBodyT;
   files?: Record<string, unknown>;
 }
@@ -23,5 +24,5 @@ export interface IAppDefaultContext<RequestBodyT>
   request: IAppRequest<RequestBodyT>;
 }
 
-export type IAppContext<RequestBodyT = unknown> =
+export type IAppContext<RequestBodyT = AnyObject> =
   IAppDefaultContext<RequestBodyT>;
