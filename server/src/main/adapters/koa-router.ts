@@ -5,8 +5,8 @@ import {
   mapHttpResponseToKoaContext,
 } from './shared/koa-mapping';
 
-export const adaptKoaRoute = <T = unknown>(controller: Controller) => {
-  return async (ctx: IAppContext<T>): Promise<void> => {
+export const adaptKoaRoute = (controller: Controller) => {
+  return async (ctx: IAppContext): Promise<void> => {
     const request = mapKoaContextToHttpRequest(ctx);
     const response = await controller.handle(request);
     mapHttpResponseToKoaContext(ctx, response);
