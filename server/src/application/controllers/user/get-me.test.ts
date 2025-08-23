@@ -56,6 +56,7 @@ describe('GetMeController', () => {
           id: useCaseResponse.id,
           name: useCaseResponse.name,
           email: useCaseResponse.email,
+          role: useCaseResponse.role,
           isOnboarded: useCaseResponse.isOnboarded,
         },
       });
@@ -99,6 +100,7 @@ describe('GetMeController', () => {
         id: useCaseResponse.id,
         name: useCaseResponse.name,
         email: useCaseResponse.email,
+        role: useCaseResponse.role,
         isOnboarded: useCaseResponse.isOnboarded,
       });
     });
