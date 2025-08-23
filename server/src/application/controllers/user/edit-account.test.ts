@@ -341,7 +341,7 @@ describe('EditAccountController', () => {
     it('should handle malformed request body', async () => {
       // Arrange
       const request: HttpRequest = {
-        body: null,
+        body: {},
         user: {
           id: faker.string.uuid(),
           roles: [UserRole.ADMIN],
