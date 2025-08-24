@@ -7,9 +7,12 @@ import KoaRatelimit from 'koa-ratelimit';
 import { ErrorMiddleware } from '../middlewares/error-handler';
 import { makeRequestLoggingMiddleware } from '../factories/application/middlewares/request-logging';
 import { config } from './app-config';
+import { setupSwagger } from './swagger';
 
 export const setupMiddlewares = (app: Koa): void => {
   const db = new Map();
+
+  setupSwagger(app);
 
   app.use(ErrorMiddleware());
   app.use(helmet());
