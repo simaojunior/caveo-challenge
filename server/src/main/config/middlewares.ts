@@ -1,17 +1,29 @@
 import type Koa from 'koa';
+import cors from '@koa/cors';
+import helmet from 'koa-helmet';
 import { koaBody } from 'koa-body';
+import KoaRatelimit from 'koa-ratelimit';
+
 import { ErrorMiddleware } from '../middlewares/error-handler';
 import { makeRequestLoggingMiddleware } from '../factories/application/middlewares/request-logging';
+import { config } from './app-config';
 
 export const setupMiddlewares = (app: Koa): void => {
-  app.use(makeRequestLoggingMiddleware());
-
-  app.use(koaBody({
-    json: true,
-    text: false,
-    multipart: false,
-    urlencoded: false,
-  }));
+  const db = new Map();
 
   app.use(ErrorMiddleware());
+  app.use(helmet());
+  app.use(
+    KoaRatelimit({
+      //TODO: Configure Redis for rate limiting in production
+      driver: 'memory',
+      db,
+      duration: config.app.rateLimit.duration,
+      max: config.app.rateLimit.max,
+      throw: true,
+    }),
+  );
+  app.use(cors({ credentials: true }));
+  app.use(makeRequestLoggingMiddleware());
+  app.use(koaBody());
 };
