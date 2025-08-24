@@ -11,6 +11,9 @@ importers:
       '@aws-sdk/client-cognito-identity-provider':
         specifier: ^3.865.0
         version: 3.865.0
+      '@koa/cors':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@koa/router':
         specifier: ^14.0.0
         version: 14.0.0
@@ -23,6 +26,12 @@ importers:
       koa-body:
         specifier: ^6.0.1
         version: 6.0.1
+      koa-helmet:
+        specifier: ^8.0.1
+        version: 8.0.1(helmet@8.1.0)
+      koa-ratelimit:
+        specifier: ^6.0.0
+        version: 6.0.0
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -51,6 +60,12 @@ importers:
       '@types/koa':
         specifier: ^3.0.0
         version: 3.0.0
+      '@types/koa-ratelimit':
+        specifier: ^5.0.5
+        version: 5.0.5
+      '@types/koa__cors':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@types/koa__router':
         specifier: ^12.0.4
         version: 12.0.4
@@ -507,6 +522,10 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
+  '@koa/cors@5.0.0':
+    resolution: {integrity: sha512-x/iUDjcS90W69PryLDIMgFyV21YLTnG9zOpPXS7Bkt2b8AsY3zZsIpOLBkYr9fBcF3HbkKaER5hOBZLfpLgYNw==}
+    engines: {node: '>= 14.0.0'}
+
   '@koa/router@14.0.0':
     resolution: {integrity: sha512-LBSu5K0qAaaQcXX/0WIB9PGDevyCxxpnc1uq13vV/CgObaVxuis5hKl3Eboq/8gcb6ebnkAStW9NB/Em2eYyFA==}
     engines: {node: '>= 20'}
@@ -889,6 +908,9 @@ packages:
   '@types/http-errors@2.0.5':
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
 
+  '@types/ioredis@4.28.10':
+    resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -898,11 +920,17 @@ packages:
   '@types/koa-compose@3.2.8':
     resolution: {integrity: sha512-4Olc63RY+MKvxMwVknCUDhRQX1pFQoBZ/lXcRLP69PQkEpze/0cr8LNqJQe5NFb/b19DWi2a5bTi2VAlQzhJuA==}
 
+  '@types/koa-ratelimit@5.0.5':
+    resolution: {integrity: sha512-BMxiDvFJ9XdLpzqGZqc6TWTg4xKr9pP3EHo/nzJPhIZwZ0e7vZ4D/4MveVvpyHfxnsHkFo8GrI/uUDv8khLgzQ==}
+
   '@types/koa@2.15.0':
     resolution: {integrity: sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==}
 
   '@types/koa@3.0.0':
     resolution: {integrity: sha512-MOcVYdVYmkSutVHZZPh8j3+dAjLyR5Tl59CN0eKgpkE1h/LBSmPAsQQuWs+bKu7WtGNn+hKfJH9Gzml+PulmDg==}
+
+  '@types/koa__cors@5.0.0':
+    resolution: {integrity: sha512-LCk/n25Obq5qlernGOK/2LUwa/2YJb2lxHUkkvYFDOpLXlVI6tKcdfCHRBQnOY4LwH6el5WOLs6PD/a8Uzau6g==}
 
   '@types/koa__router@12.0.4':
     resolution: {integrity: sha512-Y7YBbSmfXZpa/m5UGGzb7XadJIRBRnwNY9cdAojZGp65Cpe5MAP3mOZE7e3bImt8dfKS4UFcR16SLH8L/z7PBw==}
@@ -1128,6 +1156,10 @@ packages:
 
   async-lock@1.4.1:
     resolution: {integrity: sha512-Az2ZTpuytrtqENulXwO3GGv1Bztugx6TT37NIo7imr/Qo0gsYiGtSdBa2B6fsXhTpVZDNfu1Qn3pk531e3q+nQ==}
+
+  async-ratelimiter@1.6.1:
+    resolution: {integrity: sha512-dPmT3HaKbMLx++wndzx6tJOKRINgRlBjA6N5nsP77Wrzurys+2twjgDBQy9+NIrXWX32BbS0SG33Dk0Wd3ONbw==}
+    engines: {node: '>= 8'}
 
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
@@ -1712,6 +1744,10 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
+  helmet@8.1.0:
+    resolution: {integrity: sha512-jOiHyAZsmnr8LqoPGmCjYAaiuWwjAPLgY8ZX2XrmHawt99/u1y6RgrZMTeoPfpUbV96HOalYgz1qzkRbw54Pmg==}
+    engines: {node: '>=18.0.0'}
+
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
@@ -1859,6 +1895,16 @@ packages:
 
   koa-compose@4.1.0:
     resolution: {integrity: sha512-8ODW8TrDuMYvXRwra/Kh7/rJo9BtOfPc6qO8eAfC80CnCvSjSl0bkRM24X6/XBBEyj0v1nRUQ1LyOy3dbqOWXw==}
+
+  koa-helmet@8.0.1:
+    resolution: {integrity: sha512-lXDqTqNLgqyOKEuCSF3MFReJmEQQ0GD0NzkdSe9dKH87NSMc5GxAA7H5mYaAT+UJypYkIS1lPNRqTuEUgl+l3Q==}
+    engines: {node: '>= 18.0.0'}
+    peerDependencies:
+      helmet: '>= 6'
+
+  koa-ratelimit@6.0.0:
+    resolution: {integrity: sha512-UH1CXCF+yVhx5r5Fvx5eOKhc8sMHU/HhGBNCOaJ/SLO0+IcB6g5aKIE63eWsq7L3niwQWLfEbDtNGU3epKt0Hg==}
+    engines: {node: '>=18'}
 
   koa@3.0.1:
     resolution: {integrity: sha512-oDxVkRwPOHhGlxKIDiDB2h+/l05QPtefD7nSqRgDfZt8P+QVYFWjfeK8jANf5O2YXjk8egd7KntvXKYx82wOag==}
@@ -3361,6 +3407,10 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
+  '@koa/cors@5.0.0':
+    dependencies:
+      vary: 1.1.2
+
   '@koa/router@14.0.0':
     dependencies:
       debug: 4.4.1
@@ -3824,6 +3874,10 @@ snapshots:
 
   '@types/http-errors@2.0.5': {}
 
+  '@types/ioredis@4.28.10':
+    dependencies:
+      '@types/node': 24.3.0
+
   '@types/json-schema@7.0.15': {}
 
   '@types/keygrip@1.0.6': {}
@@ -3831,6 +3885,12 @@ snapshots:
   '@types/koa-compose@3.2.8':
     dependencies:
       '@types/koa': 3.0.0
+
+  '@types/koa-ratelimit@5.0.5':
+    dependencies:
+      '@types/ioredis': 4.28.10
+      '@types/koa': 3.0.0
+      '@types/node': 24.3.0
 
   '@types/koa@2.15.0':
     dependencies:
@@ -3853,6 +3913,10 @@ snapshots:
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
       '@types/node': 24.3.0
+
+  '@types/koa__cors@5.0.0':
+    dependencies:
+      '@types/koa': 3.0.0
 
   '@types/koa__router@12.0.4':
     dependencies:
@@ -4152,6 +4216,8 @@ snapshots:
       js-tokens: 9.0.1
 
   async-lock@1.4.1: {}
+
+  async-ratelimiter@1.6.1: {}
 
   async@3.2.6: {}
 
@@ -4767,6 +4833,8 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  helmet@8.1.0: {}
+
   help-me@5.0.0: {}
 
   html-escaper@2.0.2: {}
@@ -4906,6 +4974,15 @@ snapshots:
       zod: 3.25.76
 
   koa-compose@4.1.0: {}
+
+  koa-helmet@8.0.1(helmet@8.1.0):
+    dependencies:
+      helmet: 8.1.0
+
+  koa-ratelimit@6.0.0:
+    dependencies:
+      async-ratelimiter: 1.6.1
+      ms: 2.1.3
 
   koa@3.0.1:
     dependencies:
