@@ -12,12 +12,18 @@ function loadAppEnvs() {
         message: 'Port must be between 0 and 65535',
       }),
     BODY_LIMIT: z.coerce.number().default(15728640), // 15MB
+    RATE_LIMIT_DURATION: z.coerce.number().default(60 * 1000), // 1 minute in ms
+    RATE_LIMIT_MAX: z.coerce.number().default(100), // requests per window
   })
     .transform((data) => ({
       nodeEnv: data.NODE_ENV,
       host: data.HOST,
       port: data.PORT,
       bodyLimit: data.BODY_LIMIT,
+      rateLimit: {
+        duration: data.RATE_LIMIT_DURATION,
+        max: data.RATE_LIMIT_MAX,
+      },
     }));
 
   return appEnvSchema.parse(env);
@@ -82,11 +88,9 @@ function loadAuthEnvs() {
   const isTest = env.NODE_ENV === 'test';
 
   const authEnvSchema = z.object({
-    JWT_SECRET: isTest ? z.string().default('test-jwt-secret-key-for-e2e') : z.string(),
     JWT_EXPECTED_ISSUER: isTest ? z.string().default('https://cognito-idp.us-east-1.amazonaws.com/test-pool-id') : z.string(),
   })
     .transform((data) => ({
-      jwtSecret: data.JWT_SECRET,
       jwtExpectedIssuer: data.JWT_EXPECTED_ISSUER,
     }));
 
