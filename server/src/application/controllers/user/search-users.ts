@@ -42,7 +42,7 @@ export class SearchUsersController extends Controller {
     const input = inputSchema.parse({
       ...query,
       pagination: {
-        itemsPerPage: query?.itemsPerPage || ItemPerPage.TEN,
+        itemsPerPage: Number(query?.itemsPerPage) || ItemPerPage.TEN,
         page: Number(query?.page) || 1,
       },
     });
