@@ -1,19 +1,55 @@
 version: "3.8"
 
 services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: caveo_api_database
+    environment:
+      - POSTGRES_USER=${DB_USER:-caveo}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-caveo}
+      - POSTGRES_DB=${DB_NAME:-caveo}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/bitnami/postgresql
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${DB_USER:-caveo} -d ${DB_NAME:-caveo}"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    networks:
+      - caveo_network
+
   caveo-app:
     build:
       context: .
       dockerfile: Dockerfile
       target: runner
+    container_name: caveo_api_app
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-3000}
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-caveo}
+      - DB_PASSWORD=${DB_PASSWORD:-caveo}
+      - DB_NAME=${DB_NAME:-caveo}
+      - JWT_EXPECTED_ISSUER=${JWT_EXPECTED_ISSUER}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_COGNITO_CLIENT_SECRET=${AWS_COGNITO_CLIENT_SECRET}
+      - AWS_COGNITO_USER_POOL_ID=${AWS_COGNITO_USER_POOL_ID}
+      - AWS_COGNITO_CLIENT_ID=${AWS_COGNITO_CLIENT_ID}
+      - AWS_COGNITO_JWKS_URI=${AWS_COGNITO_JWKS_URI}
     volumes:
-      # Mount logs directory (if needed)
       - ./logs:/app/logs:rw
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -37,6 +73,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    networks:
+      - caveo_network
 
   # Development service
   caveo-dev:
@@ -44,13 +82,40 @@ services:
       context: .
       dockerfile: Dockerfile
       target: deps
+    container_name: caveo_api_dev
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-3000}
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-caveo}
+      - DB_PASSWORD=${DB_PASSWORD:-caveo}
+      - DB_NAME=${DB_NAME:-caveo}
+      - JWT_EXPECTED_ISSUER=${JWT_EXPECTED_ISSUER}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_COGNITO_CLIENT_SECRET=${AWS_COGNITO_CLIENT_SECRET}
+      - AWS_COGNITO_USER_POOL_ID=${AWS_COGNITO_USER_POOL_ID}
+      - AWS_COGNITO_CLIENT_ID=${AWS_COGNITO_CLIENT_ID}
+      - AWS_COGNITO_JWKS_URI=${AWS_COGNITO_JWKS_URI}
     volumes:
       - .:/app:cached
       - /app/node_modules
-    command: ["pnpm", "dev"]
+    command: ["npm", "run", "dev"]
+    depends_on:
+      postgres:
+        condition: service_healthy
     profiles:
       - dev
+    networks:
+      - caveo_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  caveo_network:
+    driver: bridge
