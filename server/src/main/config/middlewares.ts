@@ -24,6 +24,7 @@ export const setupMiddlewares = (app: Koa): void => {
       duration: config.app.rateLimit.duration,
       max: config.app.rateLimit.max,
       throw: true,
+      errorMessage: 'Too many requests. Please try again later.',
     }),
   );
   app.use(cors({ credentials: true }));
