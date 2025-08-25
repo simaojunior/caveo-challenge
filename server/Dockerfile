@@ -1,66 +1,62 @@
-# ===== Base STAGE =====
-FROM node:22-alpine AS base
+## ===== Base STAGE =====
+FROM node:22.11-alpine3.20 AS base
 
-RUN apk update && apk upgrade && \
-    apk add --no-cache libc6-compat dumb-init
-
-RUN npm install -g pnpm@10.14.0
+# Install dumb-init once in base (smaller layer)
+RUN apk add --no-cache dumb-init=1.2.5-r3
 
 WORKDIR /app
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S caveo -u 1001
 
 # ===== DEPENDENCIES STAGE =====
 FROM base AS deps
 
-# Copy package.json and pnpm-lock.yaml
-COPY package.json pnpm-lock.yaml ./
+# Copy only package files for better caching
+COPY package*.json ./
 
-# Install all dependencies
-RUN pnpm install --frozen-lockfile
+# Use ci for faster, more reliable installs in CI/CD
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# ===== DEV DEPENDENCIES STAGE =====
+FROM deps AS dev-deps
+
+# Install all dependencies including dev
+RUN npm ci && \
+    npm cache clean --force
 
 # ===== BUILD STAGE =====
-FROM base AS builder
-
-# Copy dependencies from previous stage
-COPY --from=deps /app/node_modules ./node_modules
+FROM dev-deps AS builder
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN pnpm build && \
-    pnpm prune --production
+RUN npm run build
 
 # ===== PRODUCTION STAGE =====
-FROM node:22-alpine AS runner
+FROM base AS runner
 
-# Install security updates and dumb-init
-RUN apk update && apk upgrade && \
-    apk add --no-cache dumb-init
+# Create non-root user (reuse node user that already exists)
+RUN chown -R node:node /app
 
-WORKDIR /app
+# Copy production dependencies
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S caveo -u 1001
-
-# Copy only production files
-COPY --from=builder --chown=caveo:nodejs /app/build ./build
-COPY --from=builder --chown=caveo:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=caveo:nodejs /app/package.json ./package.json
+# Copy built application
+COPY --from=builder --chown=node:node /app/build ./build
+COPY --from=builder --chown=node:node /app/package.json ./
 
 # Switch to non-root user
-USER caveo
+USER node
 
-# Expose port
+# Expose port (documentation only)
 EXPOSE 3000
 
-# Add health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "const http=require('http');http.get('http://localhost:3000/health',(r)=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"
+# Simple health check using wget (already in alpine)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
-# Use dumb-init for proper signal handling
+# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
+# Simplified start command
 CMD ["node", "build/src/main/index.js"]
