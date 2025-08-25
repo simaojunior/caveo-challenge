@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { koaSwagger } from 'koa2-swagger-ui';
 import Router from '@koa/router';
-import swaggerSpec from './swagger.json';
+import swaggerSpec from './swagger.json' with { type: 'json' };
 
 export const setupSwagger = (app: Koa): void => {
   const router = new Router();
