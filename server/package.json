@@ -6,9 +6,9 @@
   "main": "index.js",
   "scripts": {
     "create:env": "node -r fs -e \"fs.copyFileSync('.env.example', '.env', fs.constants.COPYFILE_EXCL)\"",
-    "dev": "tsx watch --env-file=.env src/main",
+    "dev": "NODE_ENV=development tsx watch --env-file=.env src/main",
     "build": "rimraf build && tsc -p tsconfig.build.json && tsc-alias",
-    "start": "node --env-file=.env build/src/main/index.js",
+    "start": "NODE_ENV=production node build/src/main/index.js",
     "type-check": "tsc --noEmit",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
