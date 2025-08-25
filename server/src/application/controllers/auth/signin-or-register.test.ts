@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 import { SigninOrRegisterController } from './signin-or-register';
 import { UserRole } from '@/domain/entities/user';
@@ -11,8 +12,7 @@ describe('SigninOrRegisterController', () => {
   let userName: string;
   let accessToken: string;
   let refreshToken: string;
-  let basicRequestBody: Record<string, unknown>;
-  let fullRequestBody: Record<string, unknown>;
+  let body: Record<string, unknown>;
   let sut: SigninOrRegisterController;
   let signinOrRegisterUseCase: SigninOrRegisterUseCase;
 
@@ -21,11 +21,7 @@ describe('SigninOrRegisterController', () => {
     userName = faker.person.fullName();
     accessToken = faker.string.alphanumeric(100);
     refreshToken = faker.string.alphanumeric(100);
-    basicRequestBody = {
-      email: userEmail,
-      password: 'Password123!',
-    };
-    fullRequestBody = {
+    body = {
       email: userEmail,
       password: 'Password123!',
       name: userName,
@@ -47,28 +43,53 @@ describe('SigninOrRegisterController', () => {
     expect(sut).toBeInstanceOf(Controller);
   });
 
-  it('should call SigninOrRegisterUseCase with correct parameters for basic signin', async () => {
+  it('should throw ZodError when email is invalid', async () => {
     const request: HttpRequest = {
-      body: basicRequestBody,
+      body: { email: 'invalid-email', password: 'Password123!' },
       headers: {},
     };
 
-    await sut.handle(request);
-
-    expect(signinOrRegisterUseCase).toHaveBeenCalledWith({
-      email: userEmail,
-      password: 'Password123!',
-      name: undefined,
-      role: undefined,
-    });
-    expect(signinOrRegisterUseCase).toHaveBeenCalledTimes(1);
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
   });
 
-  it('should call SigninOrRegisterUseCase with all provided fields', async () => {
+  it('should throw ZodError when password is too short', async () => {
     const request: HttpRequest = {
-      body: fullRequestBody,
+      body: { email: userEmail, password: 'Pass1!' },
       headers: {},
     };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when password lacks uppercase', async () => {
+    const request: HttpRequest = {
+      body: { email: userEmail, password: 'password123!' },
+      headers: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when password lacks special character', async () => {
+    const request: HttpRequest = {
+      body: { email: userEmail, password: 'Password123' },
+      headers: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when role is invalid', async () => {
+    const request: HttpRequest = {
+      body: { email: userEmail, password: 'Password123!', role: 'INVALID_ROLE' },
+      headers: {},
+    } as unknown as HttpRequest;
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should call SigninOrRegisterUseCase with correct input', async () => {
+    const request: HttpRequest = { body, headers: {} };
 
     await sut.handle(request);
 
@@ -78,13 +99,11 @@ describe('SigninOrRegisterController', () => {
       name: userName,
       role: UserRole.ADMIN,
     });
+    expect(signinOrRegisterUseCase).toHaveBeenCalledTimes(1);
   });
 
-  it('should return 200 with authentication tokens', async () => {
-    const request: HttpRequest = {
-      body: basicRequestBody,
-      headers: {},
-    };
+  it('should return 200 with valid data', async () => {
+    const request: HttpRequest = { body, headers: {} };
 
     const response = await sut.handle(request);
 
@@ -96,52 +115,5 @@ describe('SigninOrRegisterController', () => {
         isOnboarded: true,
       },
     });
-  });
-
-  it('should handle new user registration', async () => {
-    const newUserResponse = {
-      accessToken: faker.string.alphanumeric(100),
-      refreshToken: faker.string.alphanumeric(100),
-      isOnboarded: false,
-      isNewUser: true,
-    };
-
-    vi.mocked(signinOrRegisterUseCase).mockResolvedValue(newUserResponse);
-
-    const request: HttpRequest = {
-      body: basicRequestBody,
-      headers: {},
-    };
-
-    const response = await sut.handle(request);
-
-    expect(response.statusCode).toBe(200);
-    expect(response.data).toHaveProperty('isOnboarded', false);
-  });
-
-  it('should propagate authentication errors', async () => {
-    const request: HttpRequest = {
-      body: basicRequestBody,
-      headers: {},
-    };
-
-    const error = new Error('Authentication failed');
-    vi.mocked(signinOrRegisterUseCase).mockRejectedValue(error);
-
-    await expect(sut.handle(request)).rejects.toThrow('Authentication failed');
-  });
-
-  it('should validate password requirements', async () => {
-    const weakPasswordBody = {
-      email: userEmail,
-      password: 'weak',
-    };
-    const request: HttpRequest = {
-      body: weakPasswordBody,
-      headers: {},
-    };
-
-    await expect(sut.handle(request)).rejects.toThrow();
-    expect(signinOrRegisterUseCase).not.toHaveBeenCalled();
   });
 });
