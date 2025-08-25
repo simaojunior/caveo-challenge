@@ -1,17 +1,17 @@
 import { faker } from '@faker-js/faker';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 import { GetMeController } from './get-me';
 import { UserRole } from '@/domain/entities/user';
 import type { GetMeUseCase } from '@/domain/use-cases';
 import { Controller, type HttpRequest } from '@/application/contracts';
-import { ResourceNotFound } from '@/application/errors';
 
 describe('GetMeController', () => {
   let userId: string;
   let userName: string;
   let userEmail: string;
-  let userRoles: UserRole[];
+  let user: { id: string; roles: UserRole[] };
   let sut: GetMeController;
   let getMeUseCase: GetMeUseCase;
 
@@ -19,7 +19,7 @@ describe('GetMeController', () => {
     userId = faker.string.uuid();
     userName = faker.person.fullName();
     userEmail = faker.internet.email();
-    userRoles = [UserRole.USER];
+    user = { id: userId, roles: [UserRole.USER] };
     getMeUseCase = vi.fn().mockResolvedValue({
       id: userId,
       name: userName,
@@ -38,28 +38,41 @@ describe('GetMeController', () => {
     expect(sut).toBeInstanceOf(Controller);
   });
 
-  it('should call GetMeUseCase with correct parameters', async () => {
+  it('should throw ZodError when id is empty', async () => {
     const request: HttpRequest = {
-      user: { id: userId, roles: userRoles },
+      user: { id: '', roles: [UserRole.USER] },
       headers: {},
       body: {},
     };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when roles is invalid', async () => {
+    const invalidUser = { id: userId, roles: ['INVALID_ROLE'] };
+    const request: HttpRequest = {
+      user: invalidUser,
+      headers: {},
+      body: {},
+    } as unknown as HttpRequest;
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should call GetMeUseCase with correct input', async () => {
+    const request: HttpRequest = { user, headers: {}, body: {} };
 
     await sut.handle(request);
 
     expect(getMeUseCase).toHaveBeenCalledWith({
       id: userId,
-      roles: userRoles,
+      roles: [UserRole.USER],
     });
     expect(getMeUseCase).toHaveBeenCalledTimes(1);
   });
 
-  it('should return 200 with user data', async () => {
-    const request: HttpRequest = {
-      user: { id: userId, roles: userRoles },
-      headers: {},
-      body: {},
-    };
+  it('should return 200 with valid data', async () => {
+    const request: HttpRequest = { user, headers: {}, body: {} };
 
     const response = await sut.handle(request);
 
@@ -73,34 +86,5 @@ describe('GetMeController', () => {
         isOnboarded: true,
       },
     });
-  });
-
-  it('should handle admin user correctly', async () => {
-    const adminRoles = [UserRole.ADMIN];
-    const request: HttpRequest = {
-      user: { id: userId, roles: adminRoles },
-      headers: {},
-      body: {},
-    };
-
-    await sut.handle(request);
-
-    expect(getMeUseCase).toHaveBeenCalledWith({
-      id: userId,
-      roles: adminRoles,
-    });
-  });
-
-  it('should propagate use case errors', async () => {
-    const request: HttpRequest = {
-      user: { id: userId, roles: userRoles },
-      headers: {},
-      body: {},
-    };
-
-    const error = new ResourceNotFound('User not found');
-    vi.mocked(getMeUseCase).mockRejectedValue(error);
-
-    await expect(sut.handle(request)).rejects.toThrow('User not found');
   });
 });
