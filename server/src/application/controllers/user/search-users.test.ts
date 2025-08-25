@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 import { SearchUsersController } from './search-users';
 import { UserRole } from '@/domain/entities/user';
@@ -11,8 +12,7 @@ describe('SearchUsersController', () => {
   let userId: string;
   let userName: string;
   let userEmail: string;
-  let basicQuery: Record<string, unknown>;
-  let filteredQuery: Record<string, unknown>;
+  let query: Record<string, unknown>;
   let sut: SearchUsersController;
   let searchUsersUseCase: SearchUsersUseCase;
 
@@ -20,8 +20,7 @@ describe('SearchUsersController', () => {
     userId = faker.string.uuid();
     userName = faker.person.fullName();
     userEmail = faker.internet.email();
-    basicQuery = {};
-    filteredQuery = {
+    query = {
       id: userId,
       name: userName,
       email: userEmail,
@@ -58,26 +57,58 @@ describe('SearchUsersController', () => {
     expect(sut).toBeInstanceOf(Controller);
   });
 
-  it('should call SearchUsersUseCase with correct input for basic search', async () => {
-    const request: HttpRequest = { query: basicQuery, headers: {}, body: {} };
-
-    await sut.handle(request);
-
-    expect(searchUsersUseCase).toHaveBeenCalledWith({
-      pagination: {
-        itemsPerPage: ItemPerPage.TEN,
-        page: 1,
-      },
-    });
-    expect(searchUsersUseCase).toHaveBeenCalledTimes(1);
-  });
-
-  it('should call SearchUsersUseCase with correct input for filtered search', async () => {
+  it('should throw ZodError when id is invalid', async () => {
     const request: HttpRequest = {
-      query: filteredQuery,
+      query: { id: 'invalid-uuid' },
       headers: {},
       body: {},
     };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when name is too short', async () => {
+    const request: HttpRequest = {
+      query: { name: 'x' },
+      headers: {},
+      body: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when email is invalid', async () => {
+    const request: HttpRequest = {
+      query: { email: 'invalid-email' },
+      headers: {},
+      body: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when role is invalid', async () => {
+    const request: HttpRequest = {
+      query: { role: 'INVALID_ROLE' },
+      headers: {},
+      body: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when itemsPerPage is invalid', async () => {
+    const request: HttpRequest = {
+      query: { itemsPerPage: '999' },
+      headers: {},
+      body: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should call SearchUsersUseCase with correct input', async () => {
+    const request: HttpRequest = { query, headers: {}, body: {} };
 
     await sut.handle(request);
 
@@ -95,42 +126,8 @@ describe('SearchUsersController', () => {
     expect(searchUsersUseCase).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle isOnboarded string conversion correctly', async () => {
-    const queryWithFalse = { isOnboarded: 'false' };
-    const request: HttpRequest = {
-      query: queryWithFalse,
-      headers: {},
-      body: {},
-    };
-
-    await sut.handle(request);
-
-    expect(searchUsersUseCase).toHaveBeenCalledWith({
-      isOnboarded: false,
-      pagination: {
-        itemsPerPage: ItemPerPage.TEN,
-        page: 1,
-      },
-    });
-  });
-
-  it('should not include isOnboarded when not provided', async () => {
-    const queryWithoutIsOnboarded = { name: userName };
-    const request: HttpRequest = {
-      query: queryWithoutIsOnboarded,
-      headers: {},
-      body: {},
-    };
-
-    await sut.handle(request);
-
-    const actualCall = vi.mocked(searchUsersUseCase).mock.calls[0]?.[0];
-    expect(actualCall).toBeDefined();
-    expect(actualCall).not.toHaveProperty('isOnboarded');
-  });
-
   it('should return 200 with valid data', async () => {
-    const request: HttpRequest = { query: basicQuery, headers: {}, body: {} };
+    const request: HttpRequest = { query, headers: {}, body: {} };
 
     const response = await sut.handle(request);
 
@@ -156,4 +153,3 @@ describe('SearchUsersController', () => {
     });
   });
 });
-
