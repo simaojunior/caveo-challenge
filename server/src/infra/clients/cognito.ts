@@ -32,6 +32,10 @@ export class Cognito implements
     constructor(private readonly config: Config) {
       this.cognitoClient = new CognitoIdentityProviderClient({
         region: config.aws.region,
+        credentials: {
+          accessKeyId: config.aws.accessKeyId,
+          secretAccessKey: config.aws.secretAccessKey,
+        },
       });
 
       this.config = config;
