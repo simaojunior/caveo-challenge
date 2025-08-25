@@ -65,6 +65,16 @@ class DomainErrorStrategy implements IErrorStrategy {
   }
 }
 
+class RateLimitErrorStrategy implements IErrorStrategy {
+  canHandle(error: Error): boolean {
+    return error.name === 'TooManyRequestsError' || (error.message ? error.message.includes('Rate limit exceeded') : false);
+  }
+
+  handle(error: Error): HttpResponse {
+    return httpResponse.tooManyRequests(error);
+  }
+}
+
 class DefaultErrorStrategy implements IErrorStrategy {
   canHandle(): boolean {
     return true;
@@ -80,6 +90,7 @@ export class HttpErrorHandler implements IErrorHandler {
     new ZodErrorStrategy(),
     new ApplicationErrorStrategy(),
     new DomainErrorStrategy(),
+    new RateLimitErrorStrategy(),
     new DefaultErrorStrategy(),
   ];
 
