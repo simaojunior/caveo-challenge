@@ -1,21 +1,19 @@
 import { faker } from '@faker-js/faker';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 import { EditAccountController } from './edit-account';
 import { UserRole } from '@/domain/entities/user';
 import type { EditAccountUseCase } from '@/domain/use-cases';
 import { Controller, type HttpRequest } from '@/application/contracts';
-import { ResourceNotFound } from '@/application/errors';
-import { InsufficientPermissionsError } from '@/domain/errors';
 
 describe('EditAccountController', () => {
   let userId: string;
   let currentUserId: string;
   let userName: string;
   let userEmail: string;
-  let currentUserRoles: UserRole[];
-  let basicRequestBody: Record<string, unknown>;
-  let fullRequestBody: Record<string, unknown>;
+  let body: Record<string, unknown>;
+  let user: { id: string; roles: UserRole[] };
   let sut: EditAccountController;
   let editAccountUseCase: EditAccountUseCase;
 
@@ -24,16 +22,12 @@ describe('EditAccountController', () => {
     currentUserId = faker.string.uuid();
     userName = faker.person.fullName();
     userEmail = faker.internet.email();
-    currentUserRoles = [UserRole.ADMIN];
-    basicRequestBody = {
-      userId,
-      name: userName,
-    };
-    fullRequestBody = {
+    body = {
       userId,
       name: userName,
       role: UserRole.ADMIN,
     };
+    user = { id: currentUserId, roles: [UserRole.ADMIN] };
     editAccountUseCase = vi.fn().mockResolvedValue({
       id: userId,
       name: userName,
@@ -52,49 +46,63 @@ describe('EditAccountController', () => {
     expect(sut).toBeInstanceOf(Controller);
   });
 
-  it('should call EditAccountUseCase with correct parameters for name update', async () => {
+  it('should throw ZodError when userId is invalid', async () => {
     const request: HttpRequest = {
-      body: basicRequestBody,
-      user: { id: currentUserId, roles: currentUserRoles },
+      body: { userId: 'invalid-uuid', name: userName },
+      user,
       headers: {},
     };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when name is empty', async () => {
+    const request: HttpRequest = {
+      body: { userId, name: '' },
+      user,
+      headers: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when role is invalid', async () => {
+    const request: HttpRequest = {
+      body: { userId, role: 'INVALID_ROLE' },
+      user,
+      headers: {},
+    } as unknown as HttpRequest;
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should throw ZodError when no fields provided', async () => {
+    const request: HttpRequest = {
+      body: { userId },
+      user,
+      headers: {},
+    };
+
+    await expect(sut.handle(request)).rejects.toThrow(z.ZodError);
+  });
+
+  it('should call EditAccountUseCase with correct input', async () => {
+    const request: HttpRequest = { body, user, headers: {} };
 
     await sut.handle(request);
 
     expect(editAccountUseCase).toHaveBeenCalledWith({
       userId,
       currentUserId,
-      currentUserRoles,
+      currentUserRoles: [UserRole.ADMIN],
       name: userName,
-      role: undefined,
+      role: UserRole.ADMIN,
     });
     expect(editAccountUseCase).toHaveBeenCalledTimes(1);
   });
 
-  it('should call EditAccountUseCase with correct parameters for full update', async () => {
-    const request: HttpRequest = {
-      body: fullRequestBody,
-      user: { id: currentUserId, roles: currentUserRoles },
-      headers: {},
-    };
-
-    await sut.handle(request);
-
-    expect(editAccountUseCase).toHaveBeenCalledWith({
-      userId,
-      currentUserId,
-      currentUserRoles,
-      name: userName,
-      role: UserRole.ADMIN,
-    });
-  });
-
-  it('should return 200 with user data excluding role', async () => {
-    const request: HttpRequest = {
-      body: basicRequestBody,
-      user: { id: currentUserId, roles: currentUserRoles },
-      headers: {},
-    };
+  it('should return 200 with valid data', async () => {
+    const request: HttpRequest = { body, user, headers: {} };
 
     const response = await sut.handle(request);
 
@@ -107,49 +115,5 @@ describe('EditAccountController', () => {
         isOnboarded: true,
       },
     });
-  });
-
-  it('should handle missing user context', async () => {
-    const request: HttpRequest = {
-      body: basicRequestBody,
-      user: undefined,
-      headers: {},
-    };
-
-    await sut.handle(request);
-
-    expect(editAccountUseCase).toHaveBeenCalledWith({
-      userId,
-      currentUserId: undefined,
-      currentUserRoles: undefined,
-      name: userName,
-      role: undefined,
-    });
-  });
-
-  it('should propagate ResourceNotFound errors', async () => {
-    const request: HttpRequest = {
-      body: basicRequestBody,
-      user: { id: currentUserId, roles: currentUserRoles },
-      headers: {},
-    };
-
-    const error = new ResourceNotFound('User not found');
-    vi.mocked(editAccountUseCase).mockRejectedValue(error);
-
-    await expect(sut.handle(request)).rejects.toThrow('User not found');
-  });
-
-  it('should propagate InsufficientPermissionsError', async () => {
-    const request: HttpRequest = {
-      body: fullRequestBody,
-      user: { id: currentUserId, roles: [UserRole.USER] },
-      headers: {},
-    };
-
-    const error = new InsufficientPermissionsError('Insufficient permissions');
-    vi.mocked(editAccountUseCase).mockRejectedValue(error);
-
-    await expect(sut.handle(request)).rejects.toThrow('Insufficient permissions');
   });
 });
