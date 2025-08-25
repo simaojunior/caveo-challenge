@@ -7,12 +7,8 @@
   },
   "servers": [
     {
-      "url": "https://api.caveo.com.br",
-      "description": "Production server"
-    },
-    {
-      "url": "https://staging-api.caveo.com.br",
-      "description": "Staging server"
+      "url": "https://caveo-api.hustlerdev.xyz",
+      "description": "Production server base URL"
     },
     {
       "url": "http://localhost:3000",
