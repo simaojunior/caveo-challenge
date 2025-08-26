@@ -9,7 +9,6 @@ import {
   InitiateAuthCommand,
   SignUpCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import type { Config } from '@/main/config/app-config';
 import { Cognito } from './cognito';
 
 // Mock the AWS SDK
@@ -20,21 +19,11 @@ vi.mock('node:crypto');
 
 describe('Cognito Client', () => {
   let sut: Cognito;
-  let mockConfig: Config;
   let mockCognitoClient: {
     send: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    mockConfig = {
-      aws: {
-        region: faker.location.countryCode().toLowerCase(),
-        cognitoClientId: faker.string.uuid(),
-        cognitoClientSecret: faker.string.alphanumeric(32),
-        cognitoUserPoolId: faker.string.uuid(),
-      },
-    } as Config;
-
     mockCognitoClient = {
       send: vi.fn(),
     };
@@ -52,7 +41,7 @@ describe('Cognito Client', () => {
       mockHmac as unknown as ReturnType<typeof createHmac>,
     );
 
-    sut = new Cognito(mockConfig);
+    sut = new Cognito();
   });
 
   afterEach(() => {
