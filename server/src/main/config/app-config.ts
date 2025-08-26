@@ -67,8 +67,6 @@ function loadAwsEnvs() {
   const isTest = env.NODE_ENV === 'test';
 
   const awsEnvSchema = z.object({
-    AWS_ACCESS_KEY_ID: isTest ? z.string().default('test-access-key') : z.string().min(1, 'AWS_ACCESS_KEY_ID is required'),
-    AWS_SECRET_ACCESS_KEY: isTest ? z.string().default('test-secret-key') : z.string().min(1, 'AWS_SECRET_ACCESS_KEY is required'),
     AWS_COGNITO_USER_POOL_ID: isTest ? z.string().default('test-pool-id') : z.string().min(1, 'AWS_COGNITO_USER_POOL_ID is required'),
     AWS_COGNITO_CLIENT_SECRET: isTest ? z.string().default('test-client-secret') : z.string().min(1, 'AWS_COGNITO_CLIENT_SECRET is required'),
     AWS_COGNITO_CLIENT_ID: isTest ? z.string().default('test-client-id') : z.string().min(1, 'AWS_COGNITO_CLIENT_ID is required'),
@@ -76,8 +74,6 @@ function loadAwsEnvs() {
     AWS_REGION: z.string().default('us-east-1'),
   })
     .transform((data) => ({
-      accessKeyId: data.AWS_ACCESS_KEY_ID,
-      secretAccessKey: data.AWS_SECRET_ACCESS_KEY,
       cognitoUserPoolId: data.AWS_COGNITO_USER_POOL_ID,
       cognitoClientSecret: data.AWS_COGNITO_CLIENT_SECRET,
       cognitoClientId: data.AWS_COGNITO_CLIENT_ID,
