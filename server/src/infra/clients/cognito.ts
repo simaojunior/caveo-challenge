@@ -19,7 +19,7 @@ import type {
   SignIn,
   SignUp,
 } from '@/domain/contracts/clients/cognito';
-import type { Config } from '@/main/config/app-config';
+import { config } from '@/main/config/app-config';
 
 export class Cognito implements
   ISignIn,
@@ -29,22 +29,14 @@ export class Cognito implements
   IRemoveFromGroup {
     private readonly cognitoClient: CognitoIdentityProviderClient;
 
-    constructor(private readonly config: Config) {
-      this.cognitoClient = new CognitoIdentityProviderClient({
-        region: config.aws.region,
-        credentials: {
-          accessKeyId: config.aws.accessKeyId,
-          secretAccessKey: config.aws.secretAccessKey,
-        },
-      });
-
-      this.config = config;
+    constructor() {
+      this.cognitoClient = new CognitoIdentityProviderClient();
     }
 
     async signIn({ email, password }: SignIn.Input): Promise<SignIn.Output> {
       const command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
-        ClientId: this.config.aws.cognitoClientId,
+        ClientId: config.aws.cognitoClientId,
         AuthParameters: {
           USERNAME: email,
           PASSWORD: password,
@@ -71,7 +63,7 @@ export class Cognito implements
       { email, password, internalId }: SignUp.Input,
     ): Promise<SignUp.Output> {
       const command = new SignUpCommand({
-        ClientId: this.config.aws.cognitoClientId,
+        ClientId: config.aws.cognitoClientId,
         Username: email,
         Password: password,
         SecretHash: this.getSecretHash(email),
@@ -102,7 +94,7 @@ export class Cognito implements
       { username, groupName }: AddToGroup.Input,
     ): Promise<AddToGroup.Output> {
       const command = new AdminAddUserToGroupCommand({
-        UserPoolId: this.config.aws.cognitoUserPoolId,
+        UserPoolId: config.aws.cognitoUserPoolId,
         Username: username,
         GroupName: groupName,
       });
@@ -114,7 +106,7 @@ export class Cognito implements
       { externalId }: DeleteUser.Input,
     ): Promise<DeleteUser.Output> {
       const command = new AdminDeleteUserCommand({
-        UserPoolId: this.config.aws.cognitoUserPoolId,
+        UserPoolId: config.aws.cognitoUserPoolId,
         Username: externalId,
       });
 
@@ -125,7 +117,7 @@ export class Cognito implements
       { username, groupName }: RemoveFromGroup.Input,
     ): Promise<RemoveFromGroup.Output> {
       const command = new AdminRemoveUserFromGroupCommand({
-        UserPoolId: this.config.aws.cognitoUserPoolId,
+        UserPoolId: config.aws.cognitoUserPoolId,
         Username: username,
         GroupName: groupName,
       });
@@ -134,8 +126,8 @@ export class Cognito implements
     }
 
     private getSecretHash(email: string): string {
-      const clientId = this.config.aws.cognitoClientId;
-      const clientSecret = this.config.aws.cognitoClientSecret;
+      const clientId = config.aws.cognitoClientId;
+      const clientSecret = config.aws.cognitoClientSecret;
 
       return createHmac('SHA256', clientSecret)
         .update(`${email}${clientId}`)
